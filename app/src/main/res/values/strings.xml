@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Alpaca Stitch</string>
+    <string name="yarn_length_title">Enter a Length</string>
+    <string name="yarn_length_hint">yarn length</string>
+</resources>
