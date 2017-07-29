@@ -54,6 +54,41 @@ public class KnitPainter {
         }
     }
 
+    public void paintFlatKnit(Canvas canvas){
+        if(colors.isEmpty()){
+            return;
+        }
+
+        int xPos = 0;
+        int stitchCounter = 0;
+        boolean goingRight = false;
+
+        tileIndex = 0;
+        paint.setColor(colors.get(tileIndex).getColor());
+
+        for(int yPos = 0; yPos < view.getHeight(); yPos += rectangleSideLength){
+            goingRight = !goingRight;
+            for (int stitch = 0; stitch < stitchesInRow; stitch++) {
+                if (goingRight) {
+                    rect.set(xPos, yPos, xPos + rectangleSideLength, yPos + rectangleSideLength);
+                    xPos += rectangleSideLength;
+                } else {
+                    rect.set(xPos - rectangleSideLength, yPos, xPos, yPos + rectangleSideLength);
+                    xPos -= rectangleSideLength;
+                }
+
+                canvas.drawRect(rect, paint);
+
+                stitchCounter++;
+                if(stitchCounter == colors.get(tileIndex).getLength()){
+                    stitchCounter = 0;
+                    changeColor();
+                }
+
+            }
+        }
+    }
+
     public void changeColor(){
         tileIndex++;
         if(tileIndex == colors.size()){
@@ -73,5 +108,9 @@ public class KnitPainter {
 
     public void setStitchesInRow(int stitchesInRow) {
         this.stitchesInRow = stitchesInRow;
+    }
+
+    public void clearCanvas(Canvas canvas) {
+        canvas.drawARGB(255, 255, 255, 255);
     }
 }

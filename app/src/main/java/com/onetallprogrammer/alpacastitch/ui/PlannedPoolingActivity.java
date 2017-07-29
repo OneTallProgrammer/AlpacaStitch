@@ -7,8 +7,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.TypedValue;
 import android.view.Gravity;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -25,10 +26,10 @@ import com.flask.colorpicker.builder.ColorPickerClickListener;
 import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
 import com.onetallprogrammer.alpacastitch.R;
 import com.onetallprogrammer.alpacastitch.model.ColorTile;
-import com.onetallprogrammer.alpacastitch.model.KnitPainter;
 import com.onetallprogrammer.alpacastitch.model.PoolingView;
 import com.onetallprogrammer.alpacastitch.model.RepeatListener;
 
+import java.security.acl.Group;
 import java.util.ArrayList;
 
 public class PlannedPoolingActivity extends AppCompatActivity {
@@ -241,6 +242,7 @@ public class PlannedPoolingActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 colorTiles.remove(tile.getIndex());
+                updateColorTileIndices();
                 layoutColorTiles();
                 updatePool();
                 colorTileOptionsDialog.dismiss();
@@ -256,6 +258,12 @@ public class PlannedPoolingActivity extends AppCompatActivity {
 
         colorTileOptionsDialog.show();
 
+    }
+
+    private void updateColorTileIndices() {
+        for(int i = 0; i < colorTiles.size(); i++){
+            colorTiles.get(i).setIndex(i);
+        }
     }
 
     public void updatePool(){
@@ -278,5 +286,33 @@ public class PlannedPoolingActivity extends AppCompatActivity {
         super.onPause();
         plannedPoolingView.pause();
 
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.planned_pooling_options_menu, menu);
+
+        menu.setGroupCheckable(R.id.plannedPoolingOptionsGroup, true, true);
+        menu.findItem(R.id.flatKnitMenuItem).setChecked(true);
+
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        item.setChecked(true);
+
+        switch(item.getItemId()){
+            case R.id.flatKnitMenuItem:
+                plannedPoolingView.setFlatKnit(true);
+                break;
+            case R.id.circleKnitMenuItem:
+                plannedPoolingView.setFlatKnit(false);
+                break;
+        }
+
+        updatePool();
+
+        return super.onOptionsItemSelected(item);
     }
 }

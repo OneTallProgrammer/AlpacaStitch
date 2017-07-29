@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.PixelFormat;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
@@ -17,11 +18,14 @@ public class PoolingView extends SurfaceView implements Runnable {
     boolean isRunning = false;
 
     private KnitPainter knitPainter = new KnitPainter(this);
-    private boolean current = true;
+    private boolean current = false;
+
+    private boolean isFlatKnit = true;
 
     public PoolingView(Context context) {
         super(context);
         holder = getHolder();
+        holder.setFormat(PixelFormat.TRANSLUCENT);
     }
 
     @Override
@@ -33,7 +37,13 @@ public class PoolingView extends SurfaceView implements Runnable {
 
             if(!current) {
                 Canvas canvas = holder.lockCanvas();
-                knitPainter.paintCircleKnit(canvas);
+                knitPainter.clearCanvas(canvas);
+                if(isFlatKnit) {
+                    knitPainter.paintFlatKnit(canvas);
+                }
+                else{
+                    knitPainter.paintCircleKnit(canvas);
+                }
                 holder.unlockCanvasAndPost(canvas);
                 current = true;
             }
@@ -66,4 +76,10 @@ public class PoolingView extends SurfaceView implements Runnable {
     public KnitPainter getKnitPainter() {
         return knitPainter;
     }
+
+    public void setFlatKnit(boolean isFlatKnit){
+        this.isFlatKnit = isFlatKnit;
+    }
+
+
 }
