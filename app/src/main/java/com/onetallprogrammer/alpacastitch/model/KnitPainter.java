@@ -9,7 +9,7 @@ import android.view.View;
 import java.util.ArrayList;
 
 /**
- * Created by joseph on 7/24/17.
+ * Paints a canvas object with a desired pattern
  */
 
 public class KnitPainter {
@@ -21,12 +21,32 @@ public class KnitPainter {
     private int rectangleSideLength;
     private int tileIndex = 0;
 
+    /*
+        Knit Painters are only created when starting the Planned Pooling activity
+        All variables of the Knit Painter must be initialized from user input
+
+        TODO: add full constructor that will be used when coming back to a knitting project
+     */
     public KnitPainter(View view) {
         this.view = view;
 
         paint.setStyle(Paint.Style.FILL);
     }
 
+    /**
+     * Calculates and assigns the appropriate square side-length of painting rectangle object
+     *
+     * width of screen / stitches in row
+     */
+
+    public void calculateRectangleSideLength(){
+        this.rectangleSideLength = (int)Math.ceil((float)view.getWidth() / stitchesInRow);
+    }
+
+    /**
+     * Paints a circle knit pattern, left to right and row by row, on a canvas object
+     * @param canvas The canvas being painted
+     */
     public void paintCircleKnit(Canvas canvas){
         if(colors.isEmpty()){
            return;
@@ -53,6 +73,11 @@ public class KnitPainter {
             xPos = 0;
         }
     }
+
+    /**
+     * Prints a flat knit pattern, alternating left to right and right to left
+     * @param canvas The canvas being painted
+     */
 
     public void paintFlatKnit(Canvas canvas){
         if(colors.isEmpty()){
@@ -89,19 +114,6 @@ public class KnitPainter {
         }
     }
 
-    public void changeColor(){
-        tileIndex++;
-        if(tileIndex == colors.size()){
-            tileIndex = 0;
-        }
-
-        paint.setColor(colors.get(tileIndex).getColor());
-    }
-
-    public void calculateRectangleSideLength(){
-        this.rectangleSideLength = (int)Math.ceil((float)view.getWidth() / stitchesInRow);
-    }
-
     public void setColors(ArrayList<ColorTile> colors) {
         this.colors = colors;
     }
@@ -110,7 +122,17 @@ public class KnitPainter {
         this.stitchesInRow = stitchesInRow;
     }
 
-    public void clearCanvas(Canvas canvas) {
-        canvas.drawARGB(255, 255, 255, 255);
+    /**
+     * Switches to the next available color in ArrayList colors
+     * Restarts at index 0 if ending color is reached
+     */
+
+    private void changeColor(){
+        tileIndex++;
+        if(tileIndex == colors.size()){
+            tileIndex = 0;
+        }
+
+        paint.setColor(colors.get(tileIndex).getColor());
     }
 }

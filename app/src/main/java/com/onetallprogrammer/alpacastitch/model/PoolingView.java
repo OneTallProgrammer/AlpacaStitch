@@ -37,7 +37,7 @@ public class PoolingView extends SurfaceView implements Runnable {
 
             if(!current) {
                 Canvas canvas = holder.lockCanvas();
-                knitPainter.clearCanvas(canvas);
+                canvas.drawARGB(255, 255, 255, 255);
                 if(isFlatKnit) {
                     knitPainter.paintFlatKnit(canvas);
                 }

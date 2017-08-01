@@ -21,7 +21,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.flask.colorpicker.ColorPickerView;
-import com.flask.colorpicker.OnColorSelectedListener;
 import com.flask.colorpicker.builder.ColorPickerClickListener;
 import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
 import com.onetallprogrammer.alpacastitch.R;
@@ -29,7 +28,6 @@ import com.onetallprogrammer.alpacastitch.model.ColorTile;
 import com.onetallprogrammer.alpacastitch.model.PoolingView;
 import com.onetallprogrammer.alpacastitch.model.RepeatListener;
 
-import java.security.acl.Group;
 import java.util.ArrayList;
 
 public class PlannedPoolingActivity extends AppCompatActivity {
@@ -42,6 +40,9 @@ public class PlannedPoolingActivity extends AppCompatActivity {
     private Button addColorButton;
     private PoolingView plannedPoolingView;
 
+    private final int MIN_STITCHES = 1;
+    private final int MAX_STITCHES = 250;
+
     private ArrayList<ColorTile> colorTiles = new ArrayList<>();
 
     @Override
@@ -49,6 +50,7 @@ public class PlannedPoolingActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_planned_pooling);
 
+        //initialize variables
         poolingFrame = (FrameLayout) findViewById(R.id.poolingFrameLayout);
         colorTileScrollView = (HorizontalScrollView) findViewById(R.id.colorTileScrollView);
         colorTileLinearLayout = (LinearLayout) findViewById(R.id.colorTileLinearLayout);
@@ -56,20 +58,25 @@ public class PlannedPoolingActivity extends AppCompatActivity {
         decreaseStitchesButton = (ImageButton) findViewById(R.id.decreaseStitchesButton);
         stitchesInRowDisplay = (TextView) findViewById(R.id.stitchInRowDisplay);
         addColorButton = (Button) findViewById(R.id.addColorButton);
-        plannedPoolingView = new PoolingView(this);
 
+        plannedPoolingView = new PoolingView(this);
         poolingFrame.addView(plannedPoolingView);
 
-        int initialInterval = 400;
-        int interval = 30;
+        //initialize increase and decrease stitch buttons
+        int initialInterval = 400; // how long to hold a button before it starts repeating
+        int interval = 30;         // how fast the button repeats
         increaseStitchesButton.setOnTouchListener(new RepeatListener(initialInterval, interval, new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                stitchesInRowDisplay.setText(
-                        String.valueOf(
-                                Integer.parseInt(stitchesInRowDisplay.getText().toString()) + 1
-                        )
-                );
+                int currentStitches = Integer.parseInt(stitchesInRowDisplay.getText().toString());
+
+                if (currentStitches < MAX_STITCHES) {
+                    stitchesInRowDisplay.setText(
+                            String.valueOf(
+                                    currentStitches + 1
+                            )
+                    );
+                }
 
                 updatePool();
             }
@@ -80,10 +87,10 @@ public class PlannedPoolingActivity extends AppCompatActivity {
             public void onClick(View view) {
                 int currentStitches = Integer.parseInt(stitchesInRowDisplay.getText().toString());
 
-                if (currentStitches != 1) {
+                if (currentStitches != MIN_STITCHES) {
                     stitchesInRowDisplay.setText(
                             String.valueOf(
-                                    Integer.parseInt(stitchesInRowDisplay.getText().toString()) - 1
+                                    currentStitches - 1
                             )
                     );
                 }
@@ -101,8 +108,6 @@ public class PlannedPoolingActivity extends AppCompatActivity {
                         addColorButton.getWidth(),
                         addColorButton.getHeight());
 
-                newTile.setTextSize(TypedValue.COMPLEX_UNIT_SP, 40);
-                newTile.setGravity(Gravity.CENTER);
                 newTile.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
@@ -113,179 +118,6 @@ public class PlannedPoolingActivity extends AppCompatActivity {
                 selectColorTileColor(newTile, true);
             }
         });
-    }
-
-    private void layoutColorTiles() {
-        colorTileLinearLayout.removeAllViews();
-        LayoutParams params = new LayoutParams(addColorButton.getWidth(), LayoutParams.MATCH_PARENT);
-
-        for (int i = 0; i < colorTiles.size(); i++) {
-            colorTileLinearLayout.addView(colorTiles.get(i), params);
-        }
-
-        colorTileLinearLayout.addView(addColorButton, params);
-    }
-
-    public void selectColorTileColor(final ColorTile tile, final boolean isNew) {
-        ColorPickerDialogBuilder
-                .with(this)
-                .setTitle("Choose a Color")
-                .initialColor(Color.WHITE)
-                .wheelType(ColorPickerView.WHEEL_TYPE.FLOWER)
-                .density(12)
-                .setOnColorSelectedListener(new OnColorSelectedListener() {
-                    @Override
-                    public void onColorSelected(int selectedColor) {
-                        Toast.makeText(getApplicationContext(),
-                                "onColorSelected: 0x" + Integer.toHexString(selectedColor),
-                                Toast.LENGTH_LONG)
-                                .show();
-                    }
-                })
-                .setPositiveButton("ok", new ColorPickerClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int selectedColor, Integer[] allColors) {
-                        tile.setColor(selectedColor);
-                        tile.setBackgroundColor(selectedColor);
-
-                        if (isNew) {
-                            selectYarnLength(tile, isNew);
-                        }
-
-                        updatePool();
-                    }
-                })
-                .setNegativeButton("cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                    }
-                })
-                .build()
-                .show();
-    }
-
-    public void selectYarnLength(final ColorTile tile, final boolean isNew) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        View view = getLayoutInflater().inflate(R.layout.yarn_length_dialog, null);
-
-        final EditText yarnLengthEditText = view.findViewById(R.id.yarnLengthEditText);
-        Button okButton = view.findViewById(R.id.okButton);
-        Button cancelButton = view.findViewById(R.id.cancelButton);
-
-        builder.setView(view);
-        final AlertDialog yarnLengthDialog = builder.create();
-
-        okButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (!yarnLengthEditText.getText().toString().isEmpty()) {
-                    int length = Integer.parseInt(yarnLengthEditText.getText().toString());
-                    tile.setLength(length);
-                    tile.setText(String.valueOf(length));
-
-                    if (isNew) {
-                        tile.setIndex(colorTiles.size());
-                        colorTiles.add(tile);
-                        layoutColorTiles();
-                    }
-
-                    updatePool();
-
-                    yarnLengthDialog.dismiss();
-                } else {
-                    Toast.makeText(getApplicationContext(),
-                            "Enter a length or cancel",
-                            Toast.LENGTH_SHORT)
-                            .show();
-                }
-            }
-        });
-
-        cancelButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                yarnLengthDialog.dismiss();
-            }
-        });
-
-        yarnLengthDialog.show();
-
-    }
-
-    public void openColorTileOptionsDialog(final ColorTile tile) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        View view = getLayoutInflater().inflate(R.layout.color_tile_options_dialog, null);
-
-        Button editColorButton = view.findViewById(R.id.editColorButton);
-        Button editLengthButton = view.findViewById(R.id.editLengthButton);
-        Button deleteButton = view.findViewById(R.id.deleteColorTileButton);
-        Button cancelButton = view.findViewById(R.id.cancelColorTileOptionsButton);
-
-        builder.setView(view);
-        final AlertDialog colorTileOptionsDialog = builder.create();
-
-        editColorButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                selectColorTileColor(tile, false);
-            }
-        });
-
-        editLengthButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                selectYarnLength(tile, false);
-            }
-        });
-
-        deleteButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                colorTiles.remove(tile.getIndex());
-                updateColorTileIndices();
-                layoutColorTiles();
-                updatePool();
-                colorTileOptionsDialog.dismiss();
-            }
-        });
-
-        cancelButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                colorTileOptionsDialog.dismiss();
-            }
-        });
-
-        colorTileOptionsDialog.show();
-
-    }
-
-    private void updateColorTileIndices() {
-        for(int i = 0; i < colorTiles.size(); i++){
-            colorTiles.get(i).setIndex(i);
-        }
-    }
-
-    public void updatePool(){
-        plannedPoolingView.getKnitPainter().setColors(colorTiles);
-        plannedPoolingView.getKnitPainter().setStitchesInRow(Integer.parseInt(
-                stitchesInRowDisplay.getText().toString()
-        ));
-        plannedPoolingView.getKnitPainter().calculateRectangleSideLength();
-        plannedPoolingView.setCurrent(false);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        plannedPoolingView.resume();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        plannedPoolingView.pause();
-
     }
 
     @Override
@@ -314,5 +146,222 @@ public class PlannedPoolingActivity extends AppCompatActivity {
         updatePool();
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        plannedPoolingView.pause();
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        plannedPoolingView.resume();
+    }
+
+    /**
+     * Opens dialog to edit a color tile
+     * @param tile color tile being modified
+     */
+
+    public void openColorTileOptionsDialog(final ColorTile tile) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        View view = getLayoutInflater().inflate(R.layout.color_tile_options_dialog, null);
+
+        Button editColorButton = view.findViewById(R.id.editColorButton);
+        Button editLengthButton = view.findViewById(R.id.editLengthButton);
+        Button duplicateTileButton = view.findViewById(R.id.duplicateTileButton);
+        Button deleteButton = view.findViewById(R.id.deleteColorTileButton);
+        Button cancelButton = view.findViewById(R.id.cancelColorTileOptionsButton);
+
+        builder.setView(view);
+        final AlertDialog colorTileOptionsDialog = builder.create();
+
+        editColorButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                selectColorTileColor(tile, false);
+                colorTileOptionsDialog.dismiss();
+            }
+        });
+
+        editLengthButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                selectStitchCount(tile, false);
+                colorTileOptionsDialog.dismiss();
+            }
+        });
+
+        duplicateTileButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                final ColorTile duplicate = new ColorTile(tile);
+                duplicate.setIndex(colorTiles.size());
+                colorTiles.add(duplicate);
+
+                duplicate.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        openColorTileOptionsDialog(duplicate);
+                    }
+                });
+
+                layoutColorTiles();
+                updatePool();
+                colorTileOptionsDialog.dismiss();
+            }
+        });
+
+        deleteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                colorTiles.remove(tile.getIndex());
+                updateColorTileIndices();
+                layoutColorTiles();
+                updatePool();
+                colorTileOptionsDialog.dismiss();
+            }
+        });
+
+        cancelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                colorTileOptionsDialog.dismiss();
+            }
+        });
+
+        colorTileOptionsDialog.show();
+
+    }
+
+    /**
+     * Opens dialog to edit color tile's color
+     * @param tile the tile being modified or created
+     * @param isNew true if tile is new, false if tile is being modified
+     */
+
+    public void selectColorTileColor(final ColorTile tile, final boolean isNew) {
+        ColorPickerDialogBuilder
+                .with(this)
+                .setTitle("Choose a Color")
+                .initialColor(Color.WHITE)
+                .wheelType(ColorPickerView.WHEEL_TYPE.FLOWER)
+                .density(12)
+                .setPositiveButton("ok", new ColorPickerClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int selectedColor, Integer[] allColors) {
+                        tile.setColor(selectedColor);
+                        tile.setBackgroundColor(selectedColor);
+
+                        // if new, a length must also be selected before creation
+                        if (isNew) {
+                            selectStitchCount(tile, isNew);
+                        }
+
+                        updatePool();
+                    }
+                })
+                .setNegativeButton("cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                })
+                .build()
+                .show();
+    }
+
+    /**
+     * @param tile the tile being modified or created
+     * @param isNew true if tile is new, false if tile is being modified
+     */
+
+    public void selectStitchCount(final ColorTile tile, final boolean isNew) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        View view = getLayoutInflater().inflate(R.layout.stitch_count_dialog, null);
+
+        final EditText yarnLengthEditText = view.findViewById(R.id.yarnLengthEditText);
+        Button okButton = view.findViewById(R.id.okButton);
+        Button cancelButton = view.findViewById(R.id.cancelButton);
+
+        builder.setView(view);
+        final AlertDialog yarnLengthDialog = builder.create();
+
+        okButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (!yarnLengthEditText.getText().toString().isEmpty()) {
+                    int length = Integer.parseInt(yarnLengthEditText.getText().toString());
+                    tile.setLength(length);
+                    tile.setText(String.valueOf(length));
+
+                    // if new color tile, give it an index, add it to container, and reprint tiles
+                    if (isNew) {
+                        tile.setIndex(colorTiles.size());
+                        colorTiles.add(tile);
+                        layoutColorTiles();
+                    }
+
+                    updatePool();
+
+                    yarnLengthDialog.dismiss();
+                } else {
+                    Toast.makeText(getApplicationContext(),
+                            "Enter a stitch count or cancel",
+                            Toast.LENGTH_SHORT)
+                            .show();
+                }
+            }
+        });
+
+        cancelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                yarnLengthDialog.dismiss();
+            }
+        });
+
+        yarnLengthDialog.show();
+
+    }
+
+    /**
+     * Prints color tiles to frame
+     */
+
+    private void layoutColorTiles() {
+        colorTileLinearLayout.removeAllViews();
+        LayoutParams params = new LayoutParams(addColorButton.getWidth(), LayoutParams.MATCH_PARENT);
+
+        for (int i = 0; i < colorTiles.size(); i++) {
+            colorTileLinearLayout.addView(colorTiles.get(i), params);
+        }
+
+        colorTileLinearLayout.addView(addColorButton, params);
+    }
+
+    /**
+     * updates color tiles position in array
+     */
+
+    private void updateColorTileIndices() {
+        for(int i = 0; i < colorTiles.size(); i++){
+            colorTiles.get(i).setIndex(i);
+        }
+    }
+
+    /**
+     * updates the planned pool based off the most current user input
+     */
+
+    private void updatePool(){
+        plannedPoolingView.getKnitPainter().setColors(colorTiles);
+        plannedPoolingView.getKnitPainter().setStitchesInRow(Integer.parseInt(
+                stitchesInRowDisplay.getText().toString()
+        ));
+        plannedPoolingView.getKnitPainter().calculateRectangleSideLength();
+        plannedPoolingView.setCurrent(false);
     }
 }

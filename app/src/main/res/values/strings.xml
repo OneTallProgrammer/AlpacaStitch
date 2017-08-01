@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">Alpaca Stitch</string>
-    <string name="yarn_length_title">Enter a Length</string>
-    <string name="yarn_length_hint">yarn length</string>
+    <string name="yarn_length_title">Length of Color</string>
+    <string name="yarn_length_hint">give length in stitches</string>
+    <string name="cancel_button_stitch_count_dialog">cancel</string>
+    <string name="ok_button_text_stitch_count_dialog">ok</string>
 </resources>

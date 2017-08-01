@@ -34,6 +34,14 @@
         android:textColor="@color/colorAccent" />
 
     <Button
+        android:id="@+id/duplicateTileButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/background_light"
+        android:text="duplicate"
+        android:textColor="@color/colorAccent" />
+
+    <Button
         android:id="@+id/deleteColorTileButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
