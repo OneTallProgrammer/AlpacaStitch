@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#ffe6ff"
     tools:context="com.onetallprogrammer.alpacastitch.ui.PlannedPoolingActivity"
     tools:layout_editor_absoluteX="0dp"
     tools:layout_editor_absoluteY="89dp">
@@ -12,8 +13,8 @@
         android:id="@+id/increaseStitchesButton"
         android:layout_width="67dp"
         android:layout_height="43dp"
-        android:layout_marginRight="0dp"
         android:layout_marginTop="8dp"
+        android:tint="@color/colorAccent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@android:drawable/arrow_up_float" />
@@ -23,7 +24,7 @@
         android:layout_width="68dp"
         android:layout_height="45dp"
         android:layout_marginBottom="8dp"
-        android:layout_marginRight="0dp"
+        android:tint="@color/colorAccent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:srcCompat="@android:drawable/arrow_down_float" />
@@ -40,7 +41,9 @@
         app:layout_constraintBottom_toTopOf="@+id/colorTileScrollView"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toLeftOf="@+id/stitchInRowDisplay"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp">
 
     </FrameLayout>
 
@@ -50,22 +53,25 @@
         android:layout_height="57dp"
         android:layout_marginBottom="8dp"
         android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
         android:layout_marginTop="8dp"
         android:fontFamily="sans-serif-smallcaps"
+        android:gravity="center"
         android:text="TextView"
-        android:textAlignment="center"
+        android:textColor="@color/colorAccent"
         android:textSize="30sp"
         app:layout_constraintBottom_toTopOf="@+id/decreaseStitchesButton"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintLeft_toRightOf="@+id/colorTileScrollView"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/increaseStitchesButton"
-        tools:text="0" />
+        app:layout_constraintVertical_bias="0.501"
+        tools:text="0"
+        android:layout_marginStart="8dp" />
 
     <HorizontalScrollView
         android:id="@+id/colorTileScrollView"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="100dp"
         android:layout_marginBottom="8dp"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
@@ -73,12 +79,14 @@
         android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toLeftOf="@+id/decreaseStitchesButton">
+        app:layout_constraintRight_toLeftOf="@+id/decreaseStitchesButton"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp">
 
         <LinearLayout
             android:id="@+id/colorTileLinearLayout"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_height="100dp"
             android:orientation="horizontal"
             tools:layout_editor_absoluteX="8dp"
             tools:layout_editor_absoluteY="8dp">
@@ -89,8 +97,42 @@
                 android:layout_width="100dp"
                 android:layout_height="100dp"
                 android:elevation="0dp"
-                android:text="Add Color" />
+                android:text="Add Color"
+                android:textColor="@color/colorAccent" />
         </LinearLayout>
     </HorizontalScrollView>
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="7dp"
+        android:layout_marginTop="8dp"
+        android:text="s\nt\ni\nt\nc\nh\ne\ns"
+        app:layout_constraintBottom_toTopOf="@+id/stitchInRowDisplay"
+        app:layout_constraintLeft_toRightOf="@+id/poolingFrameLayout"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/increaseStitchesButton"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="7dp" />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginRight="7dp"
+        android:layout_marginTop="8dp"
+        android:text="p\ne\nr\n \n\n r\no\nw"
+        app:layout_constraintBottom_toTopOf="@+id/decreaseStitchesButton"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/stitchInRowDisplay"
+        app:layout_constraintLeft_toRightOf="@+id/poolingFrameLayout"
+        android:layout_marginLeft="8dp"
+        app:layout_constraintVertical_bias="0.507"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="7dp" />
 
 </android.support.constraint.ConstraintLayout>

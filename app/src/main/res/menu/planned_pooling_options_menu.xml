@@ -17,4 +17,7 @@
             android:title="Circle Knit"
             android:visible="true" />
     </group>
+    <item
+        android:id="@+id/resetPlannedPoolingMenuItem"
+        android:title="Reset" />
 </menu>

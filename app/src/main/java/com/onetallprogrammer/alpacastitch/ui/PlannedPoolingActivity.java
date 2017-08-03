@@ -1,7 +1,9 @@
 package com.onetallprogrammer.alpacastitch.ui;
 
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.os.PersistableBundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -10,6 +12,7 @@ import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -29,13 +32,10 @@ import com.onetallprogrammer.alpacastitch.model.PoolingView;
 import com.onetallprogrammer.alpacastitch.model.RepeatListener;
 
 import java.util.ArrayList;
+import java.util.StringTokenizer;
 
 public class PlannedPoolingActivity extends AppCompatActivity {
-    private FrameLayout poolingFrame;
-    private HorizontalScrollView colorTileScrollView;
     private LinearLayout colorTileLinearLayout;
-    private ImageButton increaseStitchesButton;
-    private ImageButton decreaseStitchesButton;
     private TextView stitchesInRowDisplay;
     private Button addColorButton;
     private PoolingView plannedPoolingView;
@@ -51,11 +51,10 @@ public class PlannedPoolingActivity extends AppCompatActivity {
         setContentView(R.layout.activity_planned_pooling);
 
         //initialize variables
-        poolingFrame = (FrameLayout) findViewById(R.id.poolingFrameLayout);
-        colorTileScrollView = (HorizontalScrollView) findViewById(R.id.colorTileScrollView);
+        FrameLayout poolingFrame = (FrameLayout) findViewById(R.id.poolingFrameLayout);
+        ImageButton increaseStitchesButton = (ImageButton) findViewById(R.id.increaseStitchesButton);
+        ImageButton decreaseStitchesButton = (ImageButton) findViewById(R.id.decreaseStitchesButton);
         colorTileLinearLayout = (LinearLayout) findViewById(R.id.colorTileLinearLayout);
-        increaseStitchesButton = (ImageButton) findViewById(R.id.increaseStitchesButton);
-        decreaseStitchesButton = (ImageButton) findViewById(R.id.decreaseStitchesButton);
         stitchesInRowDisplay = (TextView) findViewById(R.id.stitchInRowDisplay);
         addColorButton = (Button) findViewById(R.id.addColorButton);
 
@@ -118,6 +117,14 @@ public class PlannedPoolingActivity extends AppCompatActivity {
                 selectColorTileColor(newTile, true);
             }
         });
+
+        LoadPreferences();
+    }
+
+    @Override
+    public void onBackPressed() {
+        SavePreferences();
+        super.onBackPressed();
     }
 
     @Override
@@ -135,6 +142,11 @@ public class PlannedPoolingActivity extends AppCompatActivity {
         item.setChecked(true);
 
         switch(item.getItemId()){
+            case R.id.resetPlannedPoolingMenuItem:
+                colorTiles.clear();
+                stitchesInRowDisplay.setText(String.valueOf(MIN_STITCHES));
+                layoutColorTiles();
+                updatePool();
             case R.id.flatKnitMenuItem:
                 plannedPoolingView.setFlatKnit(true);
                 break;
@@ -254,7 +266,10 @@ public class PlannedPoolingActivity extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int selectedColor, Integer[] allColors) {
                         tile.setColor(selectedColor);
-                        tile.setBackgroundColor(selectedColor);
+                        tile.setShadowLayer(tile.getShadowRadius(),
+                                            tile.getShadowDx(),
+                                            tile.getShadowDy(),
+                                            tile.getShadowColor());
 
                         // if new, a length must also be selected before creation
                         if (isNew) {
@@ -295,7 +310,6 @@ public class PlannedPoolingActivity extends AppCompatActivity {
                 if (!yarnLengthEditText.getText().toString().isEmpty()) {
                     int length = Integer.parseInt(yarnLengthEditText.getText().toString());
                     tile.setLength(length);
-                    tile.setText(String.valueOf(length));
 
                     // if new color tile, give it an index, add it to container, and reprint tiles
                     if (isNew) {
@@ -333,18 +347,59 @@ public class PlannedPoolingActivity extends AppCompatActivity {
 
     private void layoutColorTiles() {
         colorTileLinearLayout.removeAllViews();
-        LayoutParams params = new LayoutParams(addColorButton.getWidth(), LayoutParams.MATCH_PARENT);
+        colorTileLinearLayout.setMinimumHeight(addColorButton.getHeight());
+        LayoutParams params = new LayoutParams(addColorButton.getWidth(), addColorButton.getHeight());
 
         for (int i = 0; i < colorTiles.size(); i++) {
             colorTileLinearLayout.addView(colorTiles.get(i), params);
         }
 
-        colorTileLinearLayout.addView(addColorButton, params);
+        colorTileLinearLayout.addView(addColorButton, addColorButton.getWidth(), LayoutParams.MATCH_PARENT);
     }
 
     /**
      * updates color tiles position in array
      */
+
+    private void SavePreferences(){
+        SharedPreferences sharedPreferences = getPreferences(MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putInt("stitchesInRow", Integer.parseInt(String.valueOf(stitchesInRowDisplay.getText().toString())));
+        StringBuilder colorTileData = new StringBuilder();
+        for(int i = 0; i < colorTiles.size(); i++){
+            colorTileData.append(colorTiles.get(i).getLength())
+                         .append(", ")
+                         .append(colorTiles.get(i).getColor())
+                         .append(", ");
+        }
+        editor.putString("colorTileData", colorTileData.toString());
+        editor.commit();   // I missed to save the data to preference here,.
+    }
+
+    private void LoadPreferences(){
+        SharedPreferences sharedPreferences = getPreferences(MODE_PRIVATE);
+        int stitchesInRow = sharedPreferences.getInt("stitchesInRow", 1);
+        stitchesInRowDisplay.setText(String.valueOf(stitchesInRow));
+
+        String colorTileData = sharedPreferences.getString("colorTileData", "");
+        StringTokenizer st = new StringTokenizer(colorTileData, ", ");
+        if(!colorTileData.isEmpty()){
+            while(st.hasMoreTokens()){
+                final ColorTile newTile = new ColorTile(this, addColorButton.getWidth(), addColorButton.getHeight());
+                newTile.setLength(Integer.parseInt(st.nextToken()));
+                newTile.setColor(Integer.parseInt(st.nextToken()));
+
+                newTile.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        openColorTileOptionsDialog(newTile);
+                    }
+                });
+
+                colorTiles.add(newTile);
+            }
+        }
+    }
 
     private void updateColorTileIndices() {
         for(int i = 0; i < colorTiles.size(); i++){

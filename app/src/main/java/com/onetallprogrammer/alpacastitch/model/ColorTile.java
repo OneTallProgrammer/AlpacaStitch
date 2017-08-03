@@ -104,6 +104,7 @@ public class ColorTile extends android.support.v7.widget.AppCompatButton {
 
     public void setColor(int color) {
         this.color = color;
+        this.setBackgroundColor(color);
     }
 
     public int getLength() {
@@ -112,6 +113,7 @@ public class ColorTile extends android.support.v7.widget.AppCompatButton {
 
     public void setLength(int length) {
         this.length = length;
+        this.setText(String.valueOf(length));
     }
 
     public int getIndex() {
